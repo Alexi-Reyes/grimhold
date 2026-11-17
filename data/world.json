@@ -2,12 +2,159 @@
   "start": "crossroads",
   "regions": [
     {
+      "id": "crossroads",
+      "name": "Crossroads",
+      "description": "A gallows tree leans over four rutted roads. Crows watch you choose which one to die on.",
+      "danger": 0,
+      "foes": [
+        "wolf",
+        "bandit"
+      ],
+      "exits": [
+        "ashen-marsh",
+        "bleak-forest",
+        "iron-keep",
+        "rotting-village"
+      ]
+    },
+    {
       "id": "ashen-marsh",
       "name": "Ashen Marsh",
       "description": "Fog, iron, and things that breathe under the water.",
       "danger": 1,
-      "foes": ["goblin", "skeleton", "ghoul"],
-      "exits": ["crossroads", "drowned-chapel"]
+      "foes": [
+        "goblin",
+        "skeleton",
+        "ghoul"
+      ],
+      "exits": [
+        "crossroads",
+        "drowned-chapel"
+      ]
+    },
+    {
+      "id": "drowned-chapel",
+      "name": "Drowned Chapel",
+      "description": "A half-sunken nave where the bell still tolls beneath black water. Something kneels at the altar and does not turn around.",
+      "danger": 2,
+      "foes": [
+        "zombie",
+        "ghoul",
+        "wraith"
+      ],
+      "exits": [
+        "ashen-marsh",
+        "bone-catacombs"
+      ]
+    },
+    {
+      "id": "bleak-forest",
+      "name": "Bleak Forest",
+      "description": "Leafless trees grown too close together, their bark scarred with claw marks at the height of a man's throat.",
+      "danger": 2,
+      "foes": [
+        "wolf",
+        "dire wolf",
+        "giant spider"
+      ],
+      "exits": [
+        "crossroads",
+        "iron-keep",
+        "hag-hollow"
+      ]
+    },
+    {
+      "id": "iron-keep",
+      "name": "Iron Keep",
+      "description": "A rusted fortress whose garrison never left. Their armor still marches the walls, empty and patient.",
+      "danger": 3,
+      "foes": [
+        "skeleton",
+        "animated armor",
+        "ogre"
+      ],
+      "exits": [
+        "crossroads",
+        "bleak-forest",
+        "bone-catacombs",
+        "frozen-pass"
+      ]
+    },
+    {
+      "id": "bone-catacombs",
+      "name": "Bone Catacombs",
+      "description": "Miles of stacked skulls and cold, patient dark. The deepest vault holds Grimhold's last, hungry secret.",
+      "danger": 4,
+      "foes": [
+        "wraith",
+        "wight",
+        "minotaur skeleton"
+      ],
+      "exits": [
+        "drowned-chapel",
+        "iron-keep",
+        "obsidian-spire"
+      ]
+    },
+    {
+      "id": "rotting-village",
+      "name": "Rotting Village",
+      "description": "Doors hang open on empty homes. The well bubbles, and the church bell rings with no one pulling the rope.",
+      "danger": 1,
+      "foes": [
+        "zombie",
+        "ghoul",
+        "bandit"
+      ],
+      "exits": [
+        "crossroads",
+        "hag-hollow"
+      ]
+    },
+    {
+      "id": "hag-hollow",
+      "name": "Hag's Hollow",
+      "description": "A sink of black mud and hanging charms of teeth and hair. Something old is humming a lullaby just out of sight.",
+      "danger": 2,
+      "foes": [
+        "green hag",
+        "giant spider",
+        "wolf"
+      ],
+      "exits": [
+        "rotting-village",
+        "bleak-forest"
+      ]
+    },
+    {
+      "id": "frozen-pass",
+      "name": "Frozen Pass",
+      "description": "A knife-edged mountain road where the wind carries voices of the travellers it buried.",
+      "danger": 3,
+      "foes": [
+        "winter wolf",
+        "yeti",
+        "ogre"
+      ],
+      "exits": [
+        "iron-keep",
+        "obsidian-spire"
+      ]
+    },
+    {
+      "id": "obsidian-spire",
+      "name": "Obsidian Spire",
+      "description": "A glass-black tower rising from the ice, its stairs worn smooth by centuries of those who went up and never came down.",
+      "danger": 5,
+      "foes": [
+        "wight",
+        "wraith",
+        "vampire spawn"
+      ],
+      "exits": [
+        "frozen-pass",
+        "bone-catacombs"
+      ]
     }
   ]
 }
