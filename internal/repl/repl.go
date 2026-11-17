@@ -3,7 +3,6 @@ package repl
 import (
     "fmt"
     "os"
-    "strings"
 )
 
 type CliCommand struct {
@@ -66,7 +65,7 @@ func exitProgram() {
 func showMap() {
 }
 
-func travelTo(args ...string) error {
+func travelTo() {
 }
 
 func look() {

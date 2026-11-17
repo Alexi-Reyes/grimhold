@@ -8,6 +8,11 @@ import (
 	"github.com/Alexi-Reyes/grimhold/internal/repl"
 )
 
+const (
+	redText = "\033[31m"
+    resetText = "\033[0m"
+)
+
 func main() {
     fmt.Println("Welcome to grimhold, a text-based dungeon crawler that runs in your terminal. Type help to see what actions you can take.")
 
@@ -24,10 +29,10 @@ func main() {
                 fmt.Fprintln(os.Stderr, err)
                 os.Exit(1)
             }
+		} else if input == "" {
+            fmt.Printf("%sPlease enter a command.%s\n", redText, resetText)
 		} else {
-		    red := "\033[31m"
-            reset := "\033[0m"
-            fmt.Printf("%sUnknown command. Type help to get a list of commands.%s\n", red, reset)
+            fmt.Printf("%sUnknown command. Type help to get a list of commands.%s\n", redText, resetText)
 		}
 	}
 }
