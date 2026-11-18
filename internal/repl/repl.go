@@ -3,6 +3,8 @@ package repl
 import (
     "fmt"
     "os"
+    "github.com/Alexi-Reyes/grimhold/internal/json"
+    "github.com/Alexi-Reyes/grimhold/internal/game"
 )
 
 type CliCommand struct {
@@ -38,6 +40,7 @@ func init() {
         "look": {
             Name: "look",
             Desc: "Describe your surroundings",
+            Callback: func(args ...string) error { look(game.CurrentRegion); return nil },
         },
         "explore": {
             Name: "explore",
@@ -68,8 +71,25 @@ func showMap() {
 func travelTo() {
 }
 
-func look() {
+func look(input string) (error) {
+    region, err := json.GetRegion(input)
+    if err != nil {
+        return err
+    }
+
+    fmt.Println(region.Description)
+    fmt.Printf("Danger level: %v\n", region.Danger)
+    fmt.Printf("Exits: %v\n", region.Exits)
+    return nil
 }
 
 func explore() {
+}
+
+func StartGame() {
+    err := json.LoadStartData()
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
 }

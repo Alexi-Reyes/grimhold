@@ -15,6 +15,7 @@ const (
 
 func main() {
     fmt.Println("Welcome to grimhold, a text-based dungeon crawler that runs in your terminal. Type help to see what actions you can take.")
+	repl.StartGame()
 
 	reader := bufio.NewReader(os.Stdin)
 	for {
