@@ -32,6 +32,7 @@ func init() {
         "map": {
             Name: "map",
             Desc: "List the known regions",
+            Callback: func(args ...string) error { showMap(); return nil },
         },
         "travel": {
             Name: "travel",
@@ -65,7 +66,20 @@ func exitProgram() {
     os.Exit(0)
 }
 
-func showMap() {
+func showMap() (error) {
+    regions, err := json.GetRegions()
+    if err != nil {
+        return err
+    }
+
+    for _, region := range regions {
+        fmt.Printf("Region: %v\n", region.Name)
+        fmt.Printf("Danger level: %v\n", region.Danger)
+        fmt.Printf("Exits: %v\n", region.Exits)
+        fmt.Println("")
+    }
+
+    return nil
 }
 
 func travelTo() {

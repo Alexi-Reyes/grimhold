@@ -51,6 +51,15 @@ func GetRegion(input string) (Region, error) {
     return Region{}, fmt.Errorf("region %q not found", input)
 }
 
+func GetRegions() ([]Region, error) {
+    world, err := LoadWorld(worldPath)
+    if err != nil {
+        return nil, err
+    }
+
+    return world.Regions, nil
+}
+
 func LoadStartData() error {
 	world, err := LoadWorld(worldPath)
     if err != nil {
