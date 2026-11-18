@@ -6,6 +6,7 @@ import (
     "slices"
     "github.com/Alexi-Reyes/grimhold/internal/json"
     "github.com/Alexi-Reyes/grimhold/internal/game"
+    "github.com/Alexi-Reyes/grimhold/internal/open5e"
 )
 
 type CliCommand struct {
@@ -60,6 +61,28 @@ func init() {
         "explore": {
             Name: "explore",
             Desc: "Wander the region (risk an encounter)",
+        },
+        "bestiary": {
+            Name: "bestiary",
+            Desc: "List monsters",
+            Callback: func(args ...string) error { bestiary(); return nil },
+        },
+        "inspect": {
+            Name: "inspect",
+            Desc: "View monster stats (usage: inspect <monster>).",
+            Callback: func(args ...string) error {
+               if len(args) == 0 {
+                    fmt.Println("Please enter a monster. (usage: inspect <monster>)")
+                    return nil
+               }
+
+                if len(args) != 1 {
+                    fmt.Println("More than one argument. (usage: inspect <monster>)")
+                    return nil
+                }
+
+                return inspect(args[0])
+            },
         },
 	}
 }
@@ -132,4 +155,29 @@ func StartGame() {
         fmt.Println(err)
         return
     }
+}
+
+func bestiary() {
+    open5e.GetMonsters()
+}
+
+func inspect(input string) error {
+    result, err := open5e.GetMonster(input)
+    if err != nil {
+        return err
+    }
+
+    if result == nil {
+        fmt.Println("No such monster.")
+        return nil
+    }
+
+    fmt.Println("Name:", result.Name)
+    fmt.Println("Strength:", result.Strength)
+    fmt.Println("Dexterity:", result.Dexterity)
+    fmt.Println("Constitution:", result.Constitution)
+    fmt.Println("Intelligence:", result.Intelligence)
+    fmt.Println("Wisdom:", result.Wisdom)
+    fmt.Println("Charisma:", result.Charisma)
+    return nil
 }
