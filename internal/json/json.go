@@ -60,6 +60,15 @@ func GetRegions() ([]Region, error) {
     return world.Regions, nil
 }
 
+func GetFoes() ([]string, error) {
+    region, err := GetRegion(game.CurrentRegion)
+    if err != nil {
+        return nil, err
+    }
+
+    return region.Foes, nil
+}
+
 func LoadStartData() error {
 	world, err := LoadWorld(worldPath)
     if err != nil {

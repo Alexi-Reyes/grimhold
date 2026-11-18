@@ -4,6 +4,7 @@ import (
     "fmt"
     "os"
     "slices"
+    "math/rand"
     "github.com/Alexi-Reyes/grimhold/internal/json"
     "github.com/Alexi-Reyes/grimhold/internal/game"
     "github.com/Alexi-Reyes/grimhold/internal/open5e"
@@ -61,6 +62,7 @@ func init() {
         "explore": {
             Name: "explore",
             Desc: "Wander the region (risk an encounter)",
+            Callback: func(args ...string) error { explore(); return nil },
         },
         "bestiary": {
             Name: "bestiary",
@@ -146,7 +148,17 @@ func look(input string) (error) {
     return nil
 }
 
-func explore() {
+func explore() error {
+    foes, err := json.GetFoes()
+    if err != nil {
+        return err
+    }
+
+    foe := foes[rand.Intn(len(foes))]
+
+    fmt.Printf("%v appears\n", foe)
+    fmt.Println("")
+    return inspect(foe)
 }
 
 func StartGame() {
