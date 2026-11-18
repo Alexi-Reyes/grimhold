@@ -3,6 +3,7 @@ package repl
 import (
     "fmt"
     "os"
+    "slices"
     "github.com/Alexi-Reyes/grimhold/internal/json"
     "github.com/Alexi-Reyes/grimhold/internal/game"
 )
@@ -37,6 +38,19 @@ func init() {
         "travel": {
             Name: "travel",
             Desc: "Travel to a connected region (usage: travel <region>)",
+            Callback: func(args ...string) error {
+               if len(args) == 0 {
+                    fmt.Println("Please enter a destination. (usage: travel <region>)")
+                    return nil
+               }
+
+                if len(args) != 1 {
+                    fmt.Println("More than one argument. (usage: travel <region>)")
+                    return nil
+                }
+
+                return travelTo(args[0]) 
+            },
         },
         "look": {
             Name: "look",
@@ -82,7 +96,19 @@ func showMap() (error) {
     return nil
 }
 
-func travelTo() {
+func travelTo(input string) error {
+    region, err := json.GetRegion(game.CurrentRegion)
+    if err != nil {
+        return err
+    }
+
+    if slices.Contains(region.Exits, input) {
+        fmt.Printf("Travelling to %v.\n", input)
+        game.CurrentRegion = input
+    } else {
+        fmt.Println("No such exit for this region.")
+    }
+    return nil
 }
 
 func look(input string) (error) {

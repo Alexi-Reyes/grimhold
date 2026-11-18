@@ -24,14 +24,13 @@ func main() {
 		if err != nil {
 			break
 		}
-		input = strings.TrimSpace(input)
-		if cmd, ok := repl.CliCommands[input]; ok {
-		   	if err := cmd.Callback(os.Args[1:]...); err != nil {
-                fmt.Fprintln(os.Stderr, err)
-                os.Exit(1)
-            }
-		} else if input == "" {
+		fields := strings.Fields(input)
+		if len(fields) == 0 {
             fmt.Printf("%sPlease enter a command.%s\n", redText, resetText)
+		} else if cmd, ok := repl.CliCommands[fields[0]]; ok {
+		   	if err := cmd.Callback(fields[1:]...); err != nil {
+                fmt.Printf("%s%v%s\n", redText, err, resetText)
+            }
 		} else {
             fmt.Printf("%sUnknown command. Type help to get a list of commands.%s\n", redText, resetText)
 		}
