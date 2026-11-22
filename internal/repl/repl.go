@@ -86,6 +86,23 @@ func init() {
                 return inspect(args[0])
             },
         },
+        "fight": {
+            Name: "fight",
+            Desc: "Fight a monster in rounds (usage: fight <monster>)",
+            Callback: func(args ...string) error {
+                if len(args) == 0 {
+                    fmt.Println("Please enter a monster. (usage: fight <monster>)")
+                    return nil
+                }
+
+                if len(args) != 1 {
+                    fmt.Println("More than one argument. (usage: fight <monster>)")
+                    return nil
+                }
+
+                return fight(args[0])
+            },
+        },
 	}
 }
 

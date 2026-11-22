@@ -19,6 +19,29 @@ type Monster struct {
     Intelligence int `json:"intelligence"`
     Wisdom int `json:"wisdom"`
     Charisma int `json:"charisma"`
+    ArmorClass int `json:"armor_class"`
+    HitPoints int `json:"hit_points"`
+    Actions json.RawMessage `json:"actions"`
+}
+
+type Action struct {
+    Name string `json:"name"`
+    AttackBonus int `json:"attack_bonus"`
+    DamageDice string `json:"damage_dice"`
+    DamageBonus int `json:"damage_bonus"`
+}
+
+func (m *Monster) AttackAction() (Action, bool) {
+    var actions []Action
+    if err := json.Unmarshal(m.Actions, &actions); err != nil {
+        return Action{}, false
+    }
+    for _, a := range actions {
+        if a.DamageDice != "" {
+            return a, true
+        }
+    }
+    return Action{}, false
 }
 
 type MonsterResponse struct {
