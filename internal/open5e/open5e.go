@@ -58,9 +58,9 @@ type MonsterResponse struct {
     Results []Monster `json:"results"`
 }
 
-func GetMonsterPage(urlStr string) (*MonsterList, error) {
-    if urlStr == "" {
-        urlStr = apiUrl + "/monsters/?format=json"
+func fetchWithCache(urlStr string) ([]byte, error) {
+    if data, ok := apiCache.Get(urlStr); ok {
+        return data, nil
     }
 
     resp, err := http.Get(urlStr)
@@ -70,6 +70,20 @@ func GetMonsterPage(urlStr string) (*MonsterList, error) {
     defer resp.Body.Close()
 
     body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return nil, err
+    }
+
+    apiCache.Set(urlStr, body)
+    return body, nil
+}
+
+func GetMonsterPage(urlStr string) (*MonsterList, error) {
+    if urlStr == "" {
+        urlStr = apiUrl + "/monsters/?format=json"
+    }
+
+    body, err := fetchWithCache(urlStr)
     if err != nil {
         return nil, err
     }
@@ -87,13 +101,8 @@ func GetMonsters() (*MonsterList, error) {
 }
 
 func GetMonster(monster string) (*Monster, error) {
-    resp, err := http.Get(apiUrl + "/monsters/?format=json&name__iexact=" + url.QueryEscape(monster))
-    if err != nil {
-        return nil, err
-    }
-    defer resp.Body.Close()
-
-    body, err := io.ReadAll(resp.Body)
+    urlStr := apiUrl + "/monsters/?format=json&name__iexact=" + url.QueryEscape(monster)
+    body, err := fetchWithCache(urlStr)
     if err != nil {
         return nil, err
     }
