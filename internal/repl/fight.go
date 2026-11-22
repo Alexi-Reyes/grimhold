@@ -162,7 +162,9 @@ func foeStrikes(name string, a open5e.Action, p *game.Character) bool {
 
 func playerFell(p *game.Character) error {
 	fmt.Println("\n☠  You have fallen...")
-	p.HP = p.MaxHP
-	fmt.Println("You wake up, bruised but alive (HP restored).")
+	p.HP = 1
+	game.CurrentRegion = "crossroads"
+	game.HasRestedInRegion = false
+	fmt.Println("You wake up at the crossroads with 1 HP.")
 	return nil
 }

@@ -26,17 +26,41 @@ func init() {
 			Name: "help",
 			Alias: "h",
 			Desc: "Show this message",
-			Callback: func(args ...string) error { listCommands(); return nil },
+			Callback: func(args ...string) error {
+				if len(args) != 0 {
+					fmt.Println("help takes no arguments.")
+					return nil
+				}
+
+				listCommands()
+				return nil
+			},
 		},
         "exit": {
             Name: "exit",
             Desc: "Exit the program",
-			Callback: func(args ...string) error { exitProgram(); return nil },
+			Callback: func(args ...string) error {
+				if len(args) != 0 {
+					fmt.Println("exit takes no arguments.")
+					return nil
+				}
+
+				exitProgram()
+				return nil
+			},
         },
         "map": {
             Name: "map",
             Desc: "List the known regions",
-            Callback: func(args ...string) error { showMap(); return nil },
+            Callback: func(args ...string) error {
+				if len(args) != 0 {
+					fmt.Println("map takes no arguments.")
+					return nil
+				}
+
+				showMap()
+				return nil
+			},
         },
         "travel": {
             Name: "travel",
@@ -58,17 +82,39 @@ func init() {
         "look": {
             Name: "look",
             Desc: "Describe your surroundings",
-            Callback: func(args ...string) error { look(game.CurrentRegion); return nil },
+            Callback: func(args ...string) error {
+				if len(args) != 0 {
+					fmt.Println("look takes no arguments.")
+					return nil
+				}
+
+				look(game.CurrentRegion)
+				return nil
+			},
         },
         "explore": {
             Name: "explore",
             Desc: "Wander the region (risk an encounter)",
-            Callback: func(args ...string) error { explore(); return nil },
+            Callback: func(args ...string) error {
+				if len(args) != 0 {
+					fmt.Println("explore takes no arguments.")
+					return nil
+				}
+
+				return explore()
+			},
         },
         "bestiary": {
             Name: "bestiary",
-            Desc: "Browse monsters in the bestiary (sub-repl)",
-            Callback: func(args ...string) error { return runBestiary() },
+            Desc: "Browse monsters in the bestiary",
+            Callback: func(args ...string) error {
+				if len(args) != 0 {
+					fmt.Println("bestiary takes no arguments.")
+					return nil
+				}
+
+				return runBestiary()
+			},
         },
         "inspect": {
             Name: "inspect",
@@ -87,42 +133,57 @@ func init() {
                 return inspect(args[0])
             },
         },
-        "fight": {
-            Name: "fight",
-            Desc: "Fight a monster in rounds (usage: fight <monster>)",
-            Callback: func(args ...string) error {
-                if len(args) == 0 {
-                    fmt.Println("Please enter a monster. (usage: fight <monster>)")
-                    return nil
-                }
-
-                if len(args) != 1 {
-                    fmt.Println("More than one argument. (usage: fight <monster>)")
-                    return nil
-                }
-
-                return fight(args[0])
-            },
-        },
         "character": {
             Name: "character",
             Desc: "Display your character sheet",
-            Callback: func(args ...string) error { showCharacter(); return nil },
+            Callback: func(args ...string) error {
+				if len(args) != 0 {
+					fmt.Println("character takes no arguments.")
+					return nil
+				}
+
+				showCharacter()
+				return nil
+			},
         },
         "rest": {
             Name: "rest",
             Desc: "Rest to restore HP (once per region visit)",
-            Callback: func(args ...string) error { rest(); return nil },
+            Callback: func(args ...string) error {
+				if len(args) != 0 {
+					fmt.Println("rest takes no arguments.")
+					return nil
+				}
+
+				rest()
+				return nil
+			},
         },
         "save": {
             Name: "save",
-            Desc: "Save the game state to save.json",
-            Callback: func(args ...string) error { saveGameCommand(); return nil },
+            Desc: "Save the game state",
+            Callback: func(args ...string) error {
+				if len(args) != 0 {
+					fmt.Println("save takes no arguments.")
+					return nil
+				}
+
+				saveGameCommand()
+				return nil
+			},
         },
         "load": {
             Name: "load",
-            Desc: "Load the game state from save.json",
-            Callback: func(args ...string) error { loadGameCommand(); return nil },
+            Desc: "Load the game state from save",
+            Callback: func(args ...string) error {
+				if len(args) != 0 {
+					fmt.Println("load takes no arguments.")
+					return nil
+				}
+
+				loadGameCommand()
+				return nil
+			},
         },
 	}
 }
@@ -188,16 +249,44 @@ func look(input string) (error) {
 }
 
 func explore() error {
-    foes, err := json.GetFoes()
+    region, err := json.GetRegion(game.CurrentRegion)
     if err != nil {
         return err
     }
 
-    foe := foes[rand.Intn(len(foes))]
+    if len(region.Foes) == 0 {
+        fmt.Println("The area is peaceful. No foes in sight.")
+        return nil
+    }
 
-    fmt.Printf("%v appears\n", foe)
-    fmt.Println("")
-    return inspect(foe)
+    rolls := region.Danger
+    if rolls < 1 {
+        rolls = 1
+    }
+
+    var chosenFoe string
+    var worstHP = -1
+
+    for i := 0; i < rolls; i++ {
+        candidate := region.Foes[rand.Intn(len(region.Foes))]
+        m, err := open5e.GetMonster(candidate)
+        if err != nil || m == nil {
+            if chosenFoe == "" {
+                chosenFoe = candidate
+            }
+            continue
+        }
+        if m.HitPoints > worstHP {
+            worstHP = m.HitPoints
+            chosenFoe = candidate
+        }
+    }
+
+    if chosenFoe == "" {
+        chosenFoe = region.Foes[rand.Intn(len(region.Foes))]
+    }
+
+    return fight(chosenFoe)
 }
 
 const adventurerArt = `
