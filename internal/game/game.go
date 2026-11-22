@@ -8,11 +8,15 @@ import (
 )
 
 var CurrentRegion string
+var HasRestedInRegion bool
 
 type Character struct {
 	HP int
 	MaxHP int
+	Level int
+	XP int
 	AttackBonus int
+	Weapon string
 	DamageDice string
 	DexBonus int
 }
@@ -20,12 +24,33 @@ type Character struct {
 var Player = Character{
 	HP: 20,
 	MaxHP: 20,
+	Level: 1,
+	XP: 0,
 	AttackBonus: 4,
+	Weapon: "Longsword",
 	DamageDice: "1d8+2",
 	DexBonus: 2,
 }
 
 const FleeDC = 10
+
+func (character *Character) NextLevelXP() int {
+	return character.Level * character.Level * 50
+}
+
+func (character *Character) AddXP(amount int) {
+	character.XP += amount
+	fmt.Printf("You gained %d XP!\n", amount)
+	for character.XP >= character.NextLevelXP() {
+		character.Level++
+		character.MaxHP += 5
+		character.HP += 5
+		character.AttackBonus += 1
+		fmt.Printf("\nLevel Up! You reached Level %d!\n", character.Level)
+		fmt.Printf("Max HP increased to %d (+5)\n", character.MaxHP)
+		fmt.Printf("Attack Bonus increased to %+d (+1)\n", character.AttackBonus)
+	}
+}
 
 func D20() int {
 	return rand.Intn(20) + 1

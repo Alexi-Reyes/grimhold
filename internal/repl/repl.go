@@ -103,6 +103,16 @@ func init() {
                 return fight(args[0])
             },
         },
+        "character": {
+            Name: "character",
+            Desc: "Display your character sheet",
+            Callback: func(args ...string) error { showCharacter(); return nil },
+        },
+        "rest": {
+            Name: "rest",
+            Desc: "Rest to restore HP (once per region visit)",
+            Callback: func(args ...string) error { rest(); return nil },
+        },
 	}
 }
 
@@ -147,6 +157,7 @@ func travelTo(input string) error {
     if slices.Contains(region.Exits, input) {
         fmt.Printf("Travelling to %v.\n", input)
         game.CurrentRegion = input
+        game.HasRestedInRegion = false
     } else {
         fmt.Println("No such exit for this region.")
     }
@@ -176,6 +187,40 @@ func explore() error {
     fmt.Printf("%v appears\n", foe)
     fmt.Println("")
     return inspect(foe)
+}
+
+const adventurerArt = `
+      /\
+     (o.o)
+   <--|#|---==>
+     / \
+    _] [_`
+
+func showCharacter() {
+    player := &game.Player
+    fmt.Println(adventurerArt)
+    fmt.Println("--- Character Sheet ---")
+    fmt.Printf("Level: %d\n", player.Level)
+    fmt.Printf("XP: %d / %d\n", player.XP, player.NextLevelXP())
+    fmt.Printf("HP: %d / %d\n", player.HP, player.MaxHP)
+    fmt.Printf("Attack Bonus: %+d\n", player.AttackBonus)
+    fmt.Printf("Weapon: %s (%s)\n", player.Weapon, player.DamageDice)
+}
+
+func rest() {
+    if game.HasRestedInRegion {
+        fmt.Println("You have already rested in this region. You must travel elsewhere before resting again.")
+        return
+    }
+
+    if game.Player.HP >= game.Player.MaxHP {
+        fmt.Println("You are already at full health.")
+        return
+    }
+
+    game.Player.HP = game.Player.MaxHP
+    game.HasRestedInRegion = true
+    fmt.Printf("You take a long rest and recover your strength. HP restored to %d/%d.\n", game.Player.HP, game.Player.MaxHP)
 }
 
 func StartGame() {

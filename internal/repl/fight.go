@@ -31,7 +31,7 @@ func fight(name string) error {
 	p := &game.Player
 
 	fmt.Printf("\n⚔  %v attacks!  (AC %d, HP %d)\n", foe.Name, foe.ArmorClass, foeHP)
-	fmt.Printf("   You: HP %d, attack %+d, damage %s\n", p.HP, p.AttackBonus, p.DamageDice)
+	fmt.Printf("   You: HP %d/%d, attack %+d, weapon %s (%s)\n", p.HP, p.MaxHP, p.AttackBonus, p.Weapon, p.DamageDice)
 
 	for round := 1; ; round++ {
 		fmt.Printf("\n── Round %d ── (attack / flee)\n", round)
@@ -74,6 +74,13 @@ func fight(name string) error {
 
 		if foeHP <= 0 {
 			fmt.Printf("%v is slain! You win.\n", foe.Name)
+			xpEarned := foe.HitPoints * 5
+
+			if xpEarned < 25 {
+				xpEarned = 25
+			}
+
+			p.AddXP(xpEarned)
 			return nil
 		}
 
