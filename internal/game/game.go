@@ -14,6 +14,7 @@ var HasRestedInRegion bool
 var SlainBestiary = []string{}
 
 const SaveFile = "save/save.json"
+const FleeDC = 10
 
 type Character struct {
 	HP int `json:"hp"`
@@ -47,8 +48,6 @@ type SaveState struct {
 	RestState bool `json:"rest_state"`
 }
 
-const FleeDC = 10
-
 func RecordSlain(name string) {
 	SlainBestiary = append(SlainBestiary, name)
 }
@@ -59,11 +58,14 @@ func IsSlain(name string) bool {
 			return true
 		}
 	}
-
 	return false
 }
 
 func SaveGame(path string) error {
+	if path == "" {
+		path = SaveFile
+	}
+
 	slain := SlainBestiary
 	if slain == nil {
 		slain = []string{}
@@ -79,13 +81,12 @@ func SaveGame(path string) error {
 
 	data, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to save data: %w", err)
+		return fmt.Errorf("failed to encode save state: %w", err)
 	}
 
 	if err := os.WriteFile(path, data, 0644); err != nil {
-		return fmt.Errorf("failed to save data: %w", err)
+		return fmt.Errorf("failed to write save file %q: %w", path, err)
 	}
-
 	return nil
 }
 
@@ -99,13 +100,12 @@ func LoadGame(path string) error {
 		if os.IsNotExist(err) {
 			return os.ErrNotExist
 		}
-
-		return fmt.Errorf("failed to read save file: %w", err)
+		return fmt.Errorf("failed to read save file %q: %w", path, err)
 	}
 
 	var state SaveState
 	if err := json.Unmarshal(data, &state); err != nil {
-		return fmt.Errorf("failed to parse save file: %w", err)
+		return fmt.Errorf("failed to parse save file %q: %w", path, err)
 	}
 
 	if state.Location != "" {
@@ -131,18 +131,17 @@ func (character *Character) NextLevelXP() int {
 	return character.Level * character.Level * 50
 }
 
-func (character *Character) AddXP(amount int) {
+func (character *Character) AddXP(amount int) int {
 	character.XP += amount
-	fmt.Printf("You gained %d XP!\n", amount)
+	levelsGained := 0
 	for character.XP >= character.NextLevelXP() {
 		character.Level++
 		character.MaxHP += 5
 		character.HP += 5
 		character.AttackBonus += 1
-		fmt.Printf("\nLevel Up! You reached Level %d!\n", character.Level)
-		fmt.Printf("Max HP increased to %d (+5)\n", character.MaxHP)
-		fmt.Printf("Attack Bonus increased to %+d (+1)\n", character.AttackBonus)
+		levelsGained++
 	}
+	return levelsGained
 }
 
 func D20() int {
@@ -150,11 +149,12 @@ func D20() int {
 }
 
 func RollDice(expr string) (int, error) {
+	expr = strings.ToLower(strings.ReplaceAll(expr, " ", ""))
 	mod := 0
 	if i := strings.LastIndexAny(expr, "+-"); i > 0 {
 		m, err := strconv.Atoi(expr[i:])
 		if err != nil {
-			return 0, fmt.Errorf("invalid dice %q", expr)
+			return 0, fmt.Errorf("invalid dice modifier %q in expression %q", expr[i:], expr)
 		}
 		mod = m
 		expr = expr[:i]
@@ -162,19 +162,19 @@ func RollDice(expr string) (int, error) {
 
 	parts := strings.Split(expr, "d")
 	if len(parts) != 2 {
-		return 0, fmt.Errorf("invalid dice %q", expr)
+		return 0, fmt.Errorf("invalid dice format %q (expected XdY)", expr)
 	}
 	count := 1
 	if parts[0] != "" {
 		c, err := strconv.Atoi(parts[0])
 		if err != nil || c < 1 {
-			return 0, fmt.Errorf("invalid dice %q", expr)
+			return 0, fmt.Errorf("invalid dice count %q in expression", parts[0])
 		}
 		count = c
 	}
 	sides, err := strconv.Atoi(parts[1])
 	if err != nil || sides < 1 {
-		return 0, fmt.Errorf("invalid dice %q", expr)
+		return 0, fmt.Errorf("invalid dice sides %q in expression", parts[1])
 	}
 
 	total := mod

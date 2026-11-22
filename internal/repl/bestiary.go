@@ -12,16 +12,17 @@ import (
 var bestiaryReader = bufio.NewReader(os.Stdin)
 
 func runBestiary() error {
+	fmt.Println(Colorize(Dim, "\nConsulting the bestiary..."))
 	page, err := open5e.GetMonsterPage("")
 	if err != nil {
-		fmt.Printf("Failed to load bestiary: %v\n", err)
+		fmt.Printf("%s Failed to load bestiary: %v\n", Colorize(Red, "✖"), err)
 		return nil
 	}
 
 	displayBestiaryPage(page)
 
 	for {
-		fmt.Print("grimhold (bestiary) > ")
+		fmt.Print(Colorize(BoldCyan, "grimhold (bestiary) > "))
 		line, err := bestiaryReader.ReadString('\n')
 		if err != nil {
 			break
@@ -31,14 +32,13 @@ func runBestiary() error {
 		switch cmd {
 		case "next":
 			if page.Next == nil || *page.Next == "" {
-				fmt.Println("You are on the last page.")
+				fmt.Println(Colorize(Yellow, "You are already on the last page."))
 				continue
 			}
-
-			fmt.Println("Loading next page...")
+			fmt.Println(Colorize(Dim, "Turning page forward..."))
 			nextPage, err := open5e.GetMonsterPage(*page.Next)
 			if err != nil {
-				fmt.Printf("Error loading page: %v\n", err)
+				fmt.Printf("%s Error loading page: %v\n", Colorize(Red, "✖"), err)
 				continue
 			}
 
@@ -47,14 +47,13 @@ func runBestiary() error {
 
 		case "previous":
 			if page.Previous == nil || *page.Previous == "" {
-				fmt.Println("You are on the first page.")
+				fmt.Println(Colorize(Yellow, "You are already on the first page."))
 				continue
 			}
-
-			fmt.Println("Loading previous page...")
+			fmt.Println(Colorize(Dim, "Turning page backward..."))
 			prevPage, err := open5e.GetMonsterPage(*page.Previous)
 			if err != nil {
-				fmt.Printf("Error loading page: %v\n", err)
+				fmt.Printf("%s Error loading page: %v\n", Colorize(Red, "✖"), err)
 				continue
 			}
 
@@ -66,32 +65,34 @@ func runBestiary() error {
 			return nil
 
 		case "help", "h":
-			fmt.Println("Bestiary commands:")
-			fmt.Println("next (n) - View the next page")
-			fmt.Println("prev (p) - View the previous page")
-			fmt.Println("back (q) - Exit bestiary")
+			fmt.Println(Colorize(BoldCyan, "Bestiary Controls:"))
+			fmt.Println(Colorize(White, "  next (n) - Next page"))
+			fmt.Println(Colorize(White, "  prev (p) - Previous page"))
+			fmt.Println(Colorize(White, "  back (q) - Exit bestiary"))
 
 		case "":
 			continue
 
 		default:
-			fmt.Println("Unknown bestiary command. Options: next, prev, back.")
+			fmt.Println(Colorize(Yellow, "Commands: next (n), prev (p), back (q)"))
 		}
 	}
 	return nil
 }
 
 func displayBestiaryPage(page *open5e.MonsterList) {
-	fmt.Println("\n=== Bestiary ===")
+	fmt.Println(Colorize(BoldCyan, "\n=== Bestiary of Foes ==="))
 	if len(page.Results) == 0 {
-		fmt.Println("No monsters found.")
+		fmt.Println(Colorize(Yellow, "No monsters recorded."))
 		return
 	}
 
 	for _, monster := range page.Results {
-		slainStatus := "[UNSLAIN]"
+		var status string
 		if game.IsSlain(monster.Name) {
-			slainStatus = "[SLAIN]  "
+			status = Colorize(BoldGreen, "[SLAIN]  ")
+		} else {
+			status = Colorize(Dim, "[UNSLAIN]")
 		}
 
 		var details []string
@@ -104,32 +105,30 @@ func displayBestiaryPage(page *open5e.MonsterList) {
 		}
 
 		if monster.HitPoints > 0 {
-			details = append(details, fmt.Sprintf("HP %d", monster.HitPoints))
+			details = append(details, fmt.Sprintf("%d HP", monster.HitPoints))
 		}
 
 		if monster.ArmorClass > 0 {
-			details = append(details, fmt.Sprintf("AC %d", monster.ArmorClass))
+			details = append(details, fmt.Sprintf("%d AC", monster.ArmorClass))
 		}
 
 		detailStr := ""
 		if len(details) > 0 {
-			detailStr = " (" + strings.Join(details, ", ") + ")"
+			detailStr = Colorize(Dim, " ("+strings.Join(details, ", ")+")")
 		}
 
-		fmt.Printf(" %s %s%s\n", slainStatus, monster.Name, detailStr)
+		fmt.Printf(" %s %s%s\n", status, Colorize(BoldWhite, monster.Name), detailStr)
 	}
 
-	nav := []string{}
+	var nav []string
 	if page.Previous != nil && *page.Previous != "" {
-		nav = append(nav, "prev")
+		nav = append(nav, Colorize(Yellow, "prev"))
 	}
 
 	if page.Next != nil && *page.Next != "" {
-		nav = append(nav, "next")
+		nav = append(nav, Colorize(Yellow, "next"))
 	}
+	nav = append(nav, Colorize(BoldCyan, "back"))
 
-	nav = append(nav, "back")
-
-	fmt.Printf("\n[Commands: %s]\n", strings.Join(nav, " | "))
+	fmt.Printf("\n[ %s ]\n\n", strings.Join(nav, " | "))
 }
-
