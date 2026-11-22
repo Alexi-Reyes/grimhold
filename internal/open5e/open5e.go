@@ -13,6 +13,9 @@ const (
 
 type Monster struct {
     Name string `json:"name"`
+    Size string `json:"size"`
+    Type string `json:"type"`
+    ChallengeRating string `json:"challenge_rating"`
     Strength int `json:"strength"`
     Dexterity int `json:"dexterity"`
     Constitution int `json:"constitution"`
@@ -44,12 +47,23 @@ func (m *Monster) AttackAction() (Action, bool) {
     return Action{}, false
 }
 
+type MonsterList struct {
+    Count int `json:"count"`
+    Next *string `json:"next"`
+    Previous *string `json:"previous"`
+    Results []Monster `json:"results"`
+}
+
 type MonsterResponse struct {
     Results []Monster `json:"results"`
 }
 
-func GetMonsters() ([]byte, error) {
-    resp, err := http.Get(apiUrl + "/monsters/?format=json")
+func GetMonsterPage(urlStr string) (*MonsterList, error) {
+    if urlStr == "" {
+        urlStr = apiUrl + "/monsters/?format=json"
+    }
+
+    resp, err := http.Get(urlStr)
     if err != nil {
         return nil, err
     }
@@ -60,9 +74,17 @@ func GetMonsters() ([]byte, error) {
         return nil, err
     }
 
-    return body, nil
+    var list MonsterList
+    if err := json.Unmarshal(body, &list); err != nil {
+        return nil, err
+    }
+
+    return &list, nil
 }
 
+func GetMonsters() (*MonsterList, error) {
+    return GetMonsterPage("")
+}
 
 func GetMonster(monster string) (*Monster, error) {
     resp, err := http.Get(apiUrl + "/monsters/?format=json&name__iexact=" + url.QueryEscape(monster))

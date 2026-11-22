@@ -67,8 +67,8 @@ func init() {
         },
         "bestiary": {
             Name: "bestiary",
-            Desc: "List monsters",
-            Callback: func(args ...string) error { bestiary(); return nil },
+            Desc: "Browse monsters in the bestiary (sub-repl)",
+            Callback: func(args ...string) error { return runBestiary() },
         },
         "inspect": {
             Name: "inspect",
@@ -264,10 +264,6 @@ func StartGame() {
         fmt.Println(err)
         return
     }
-}
-
-func bestiary() {
-    open5e.GetMonsters()
 }
 
 func inspect(input string) error {

@@ -53,6 +53,16 @@ func RecordSlain(name string) {
 	SlainBestiary = append(SlainBestiary, name)
 }
 
+func IsSlain(name string) bool {
+	for _, slain := range SlainBestiary {
+		if strings.EqualFold(slain, name) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func SaveGame(path string) error {
 	slain := SlainBestiary
 	if slain == nil {
