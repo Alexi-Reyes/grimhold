@@ -96,7 +96,7 @@ func displayBestiaryPage(page *open5e.MonsterList) {
 
 		var details []string
 		if monster.ChallengeRating != "" {
-			details = append(details, "CR "+m.ChallengeRating)
+			details = append(details, "CR "+monster.ChallengeRating)
 		}
 
 		if monster.Type != "" {
