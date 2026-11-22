@@ -74,6 +74,7 @@ func fight(name string) error {
 
 		if foeHP <= 0 {
 			fmt.Printf("%v is slain! You win.\n", foe.Name)
+			game.RecordSlain(foe.Name)
 			xpEarned := foe.HitPoints * 5
 
 			if xpEarned < 25 {
@@ -81,6 +82,13 @@ func fight(name string) error {
 			}
 
 			p.AddXP(xpEarned)
+
+			goldEarned := foe.HitPoints * 2
+			if goldEarned < 10 {
+				goldEarned = 10
+			}
+			p.Gold += goldEarned
+			fmt.Printf("You found %d gold!\n", goldEarned)
 			return nil
 		}
 

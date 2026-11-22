@@ -1,6 +1,7 @@
 package repl
 
 import (
+    "errors"
     "fmt"
     "os"
     "slices"
@@ -113,6 +114,16 @@ func init() {
             Desc: "Rest to restore HP (once per region visit)",
             Callback: func(args ...string) error { rest(); return nil },
         },
+        "save": {
+            Name: "save",
+            Desc: "Save the game state to save.json",
+            Callback: func(args ...string) error { saveGameCommand(); return nil },
+        },
+        "load": {
+            Name: "load",
+            Desc: "Load the game state from save.json",
+            Callback: func(args ...string) error { loadGameCommand(); return nil },
+        },
 	}
 }
 
@@ -202,9 +213,33 @@ func showCharacter() {
     fmt.Println("--- Character Sheet ---")
     fmt.Printf("Level: %d\n", player.Level)
     fmt.Printf("XP: %d / %d\n", player.XP, player.NextLevelXP())
+    fmt.Printf("Gold: %d\n", player.Gold)
     fmt.Printf("HP: %d / %d\n", player.HP, player.MaxHP)
     fmt.Printf("Attack Bonus: %+d\n", player.AttackBonus)
     fmt.Printf("Weapon: %s (%s)\n", player.Weapon, player.DamageDice)
+}
+
+func saveGameCommand() {
+    if err := game.SaveGame(game.SaveFile); err != nil {
+        fmt.Printf("Error saving game: %v\n", err)
+        return
+    }
+
+    fmt.Println("Game saved to save.json.")
+}
+
+func loadGameCommand() {
+    if err := game.LoadGame(game.SaveFile); err != nil {
+        if errors.Is(err, os.ErrNotExist) {
+            fmt.Println("No save file found.")
+            return
+        }
+
+        fmt.Printf("Error loading save: %v\n", err)
+        return
+    }
+
+    fmt.Printf("Loaded save from %s. Resuming in %s.\n", game.SaveFile, game.CurrentRegion)
 }
 
 func rest() {

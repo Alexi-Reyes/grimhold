@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
-	"bufio"
 	"strings"
 	"github.com/Alexi-Reyes/grimhold/internal/repl"
 )

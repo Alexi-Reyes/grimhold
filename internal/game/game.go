@@ -1,24 +1,30 @@
 package game
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 )
 
 var CurrentRegion string
 var HasRestedInRegion bool
+var SlainBestiary = []string{}
+
+const SaveFile = "save/save.json"
 
 type Character struct {
-	HP int
-	MaxHP int
-	Level int
-	XP int
-	AttackBonus int
-	Weapon string
-	DamageDice string
-	DexBonus int
+	HP int `json:"hp"`
+	MaxHP int `json:"max_hp"`
+	Level int `json:"level"`
+	XP int `json:"xp"`
+	Gold int `json:"gold"`
+	AttackBonus int `json:"attack_bonus"`
+	Weapon string `json:"weapon"`
+	DamageDice string `json:"damage_dice"`
+	DexBonus int `json:"dex_bonus"`
 }
 
 var Player = Character{
@@ -26,13 +32,90 @@ var Player = Character{
 	MaxHP: 20,
 	Level: 1,
 	XP: 0,
+	Gold: 0,
 	AttackBonus: 4,
 	Weapon: "Longsword",
 	DamageDice: "1d8+2",
 	DexBonus: 2,
 }
 
+type SaveState struct {
+	Location string `json:"location"`
+	Character Character `json:"character"`
+	SlainBestiary []string `json:"slain_bestiary"`
+	Gold int `json:"gold"`
+	RestState bool `json:"rest_state"`
+}
+
 const FleeDC = 10
+
+func RecordSlain(name string) {
+	SlainBestiary = append(SlainBestiary, name)
+}
+
+func SaveGame(path string) error {
+	slain := SlainBestiary
+	if slain == nil {
+		slain = []string{}
+	}
+
+	state := SaveState{
+		Location: CurrentRegion,
+		Character: Player,
+		SlainBestiary: slain,
+		Gold: Player.Gold,
+		RestState: HasRestedInRegion,
+	}
+
+	data, err := json.MarshalIndent(state, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to save data: %w", err)
+	}
+
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		return fmt.Errorf("failed to save data: %w", err)
+	}
+
+	return nil
+}
+
+func LoadGame(path string) error {
+	if path == "" {
+		path = SaveFile
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return os.ErrNotExist
+		}
+
+		return fmt.Errorf("failed to read save file: %w", err)
+	}
+
+	var state SaveState
+	if err := json.Unmarshal(data, &state); err != nil {
+		return fmt.Errorf("failed to parse save file: %w", err)
+	}
+
+	if state.Location != "" {
+		CurrentRegion = state.Location
+	}
+
+	Player = state.Character
+	if state.Gold != 0 && Player.Gold == 0 {
+		Player.Gold = state.Gold
+	}
+
+	if state.SlainBestiary != nil {
+		SlainBestiary = state.SlainBestiary
+	} else {
+		SlainBestiary = []string{}
+	}
+
+	HasRestedInRegion = state.RestState
+	return nil
+}
 
 func (character *Character) NextLevelXP() int {
 	return character.Level * character.Level * 50
